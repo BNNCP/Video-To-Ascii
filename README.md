@@ -8,4 +8,4 @@
 * Allow users to upload videos and play with ascii.
 ---
 
-Fell free to try out in the [link to website](https://bnnvidtoascii.netlify.app/)
+### Feel free to try out the website [here](https://bnnvidtoascii.netlify.app/)
