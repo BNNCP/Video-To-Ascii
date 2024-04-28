@@ -1,0 +1,9 @@
+﻿@Server_HostAddress = https://localhost:7097
+
+Get {{Server_HostAddress}}/getvideo/https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DvwVOWGjgFw4
+
+###
+
+Get {{Server_HostAddress}}/getvideo
+
+###

@@ -1,20 +1,42 @@
 const vidBody = document.getElementById('vid');
+const serverUrl = 'https://localhost:7097';
 
 const videos = new Map([
     ["Bad Apple", "../src/BadApple.mp4"],
+    ["Baka Mitai", "../src/BakaMitai.mp4"]
 ])
 
-const getVideo = () => {
-    const returnDom = document.createElement("video");
-    returnDom.src = videos.get("Bad Apple");
-    returnDom.style.width = "635px";
-    returnDom.style.height = "360px";
-    return returnDom;
+const getVideo = async () => {
+    const getStreamByUrl = async (_url) => await fetch(`${serverUrl}/getvideo/${_url}`).then(async (response) => await response.blob());
+    const resetElements = (_elements) => elements.forEach(i => {
+        let dom = document.getElementById(i);
+        while (dom != null) {
+            dom.remove();
+            dom = document.getElementById(i);
+        }
+    })
+
+    const elements = ["canvas", "btnPlayAndPause", "videoDom"];
+    resetElements(elements);
+
+    const url = document.getElementById("search-url").value;
+    const encodedUrl = encodeURIComponent(url);
+    const blob = await getStreamByUrl(encodedUrl);
+    const videoDom = document.createElement("video");
+    videoDom.id = "videoDom";
+    videoDom.src = URL.createObjectURL(blob);
+    videoDom.style.width = "1200px";
+    videoDom.style.height = "720px";
+
+    var timeId;
+    const videoBtn = getButton(videoDom);
+    initVideoEvents(timeId, videoBtn, videoDom);
+    videoBtn.addEventListener("click", (e) => videoBtnClickEvent(e.target, videoDom));
 }
 
-const initVideoEvents = (timerId, btn) => {
+const initVideoEvents = (timerId, btn, videoDom) => {
     const renderVideoFrame = () => {
-        const asciiList = ["b", "n", "c", "p", "　"];
+        const asciiList = ["@", "#", "8", "&", "o", ":", "*", ".", " "];
         const scale = parseInt(videoDom.videoHeight / parseFloat(videoDom.style.height));
         const gap = 12 / scale;
         const videoSize = { width: parseFloat(videoDom.videoWidth), height: parseFloat(videoDom.videoHeight) };
@@ -30,6 +52,7 @@ const initVideoEvents = (timerId, btn) => {
             canvas.width = videoSize.width;
             canvas.height = videoSize.height;
             vidBody.appendChild(canvas);
+            vidBody.appendChild(videoDom);
         }
 
         const ctx = canvas.getContext("2d");
@@ -88,6 +111,7 @@ const initVideoEvents = (timerId, btn) => {
 
 const getButton = (dom) => {
     var btnPlayAndPause = document.createElement("div");
+    btnPlayAndPause.id = 'btnPlayAndPause';
     btnPlayAndPause.style.color = "#fff";
     btnPlayAndPause.style.textAlign = "center";
     btnPlayAndPause.style.position = "absolute";
@@ -110,8 +134,5 @@ const videoBtnClickEvent = (btn, dom) => {
     }
 }
 
-const videoDom = getVideo();
-var timeId;
-const videoBtn = getButton(videoDom);
-initVideoEvents(timeId, videoBtn);
-videoBtn.addEventListener("click", (e) => videoBtnClickEvent(e.target, videoDom));
+const searchBtn = document.getElementById('search-btn');
+searchBtn.addEventListener("click", async () => await getVideo());

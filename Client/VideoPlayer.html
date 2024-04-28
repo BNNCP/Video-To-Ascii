@@ -18,15 +18,45 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 3rem;
     }
 
     #vid {
         position: relative;
     }
+
+    .search-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .search-input {
+        padding: 10px;
+        width: 300px;
+        font-size: 16px;
+    }
+
+    .search-button {
+        padding: 10px 20px;
+        margin-left: 1rem;
+        font-size: 16px;
+        background-color: #ff0000;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    .search-button:hover {
+        background-color: #cc0000;
+    }
 </style>
 
 <body>
     <div class="container">
+        <div class="row search-container">
+            <input type="text" id="search-url" class="search-input" placeholder="輸入您想搜尋的內容...">
+            <button id="search-btn" class="search-button">搜尋</button>
+        </div>
         <div class="row">
             <div id="vid" class="col"></div>
         </div>
