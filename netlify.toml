@@ -1,4 +1,4 @@
 [[redirects]]
 from = "/*"
-to = "./VideoPlayer.html"
+to = "./Client/VideoPlayer.html"
 status = 200
