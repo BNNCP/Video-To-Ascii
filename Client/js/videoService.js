@@ -1,5 +1,5 @@
 const vidBody = document.getElementById('vid');
-const serverUrl = 'https://localhost:7097';
+const serverUrl = ' http://localhost:5000';
 
 const videos = new Map([
     ["Bad Apple", "../src/BadApple.mp4"],
@@ -57,7 +57,6 @@ const initVideoEvents = (timerId, btn, videoDom) => {
 
         const ctx = canvas.getContext("2d");
         ctx.drawImage(videoDom, 0, 0, videoSize.width, videoSize.height);
-
         const imgData = ctx.getImageData(0, 0, videoSize.width, videoSize.height).data;
         ctx.clearRect(0, 0, videoSize.width, videoSize.height);
         ctx.font = gap + "px Verdana";
@@ -69,6 +68,7 @@ const initVideoEvents = (timerId, btn, videoDom) => {
                     b = imgData[position + 2];
                 const gray = (r * 30 + g * 59 + b * 11 + 50) / 100;
                 const i = Math.min(asciiList.length - 1, parseInt(gray / (255 / asciiList.length)));
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
                 ctx.fillText(asciiList[i], w, h);
             }
         }
