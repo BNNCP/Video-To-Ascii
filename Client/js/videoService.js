@@ -123,7 +123,6 @@ const initVideoEvents = (btn, videoDom) => {
 const initControls = () => {
     const setVolumn = (val) => {
         const player = document.getElementById('videoDom');
-        console.log(player);
         if (player) {
             player.volume = val / 100;
         }
