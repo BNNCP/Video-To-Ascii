@@ -4,61 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+    <title>Ascii阿斯給</title>
+    <link rel="icon" href="./src/img/favicon-16x16.png">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <style>
-    .container {
-        height: 1200px;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-    }
-
-    .row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 3rem;
-    }
-
-    #vid {
-        position: relative;
-    }
-
-    .search-container {
-        margin-top: 20px;
-        text-align: center;
-    }
-
-    .search-input {
-        padding: 10px;
-        width: 300px;
-        font-size: 16px;
-    }
-
-    .search-button {
-        padding: 10px 20px;
-        margin-left: 1rem;
-        font-size: 16px;
-        background-color: #ff0000;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-
-    .search-button:hover {
-        background-color: #cc0000;
-    }
 </style>
 
 <body>
     <div class="container">
         <div class="row search-container">
             <input type="text" id="search-url" class="search-input" placeholder="輸入您想搜尋的內容...">
-            <button id="search-btn" class="search-button">搜尋</button>
+            <button id="search-btn" class="button search-button">搜尋</button>
+            <button id="reset-btn" class="button reset-button">清除</button>
         </div>
         <div class="row">
             <div id="vid" class="col"></div>
+        </div>
+        <div class="row">
+            <div id="vid-control">
+
+            </div>
         </div>
     </div>
     <script src="./js/videoService.js"></script>

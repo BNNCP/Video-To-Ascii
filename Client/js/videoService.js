@@ -1,42 +1,53 @@
 const vidBody = document.getElementById('vid');
-const serverUrl = ' http://localhost:5000';
+const serverUrl = 'http://localhost:5000';
 
 const videos = new Map([
     ["Bad Apple", "../src/BadApple.mp4"],
     ["Baka Mitai", "../src/BakaMitai.mp4"]
 ])
 
-const getVideo = async () => {
-    const getStreamByUrl = async (_url) => await fetch(`${serverUrl}/getvideo/${_url}`).then(async (response) => await response.blob());
-    const resetElements = (_elements) => elements.forEach(i => {
-        let dom = document.getElementById(i);
+const resetElements = async () => {
+    const elements = ["canvas", "btnPlayAndPause", "videoDom", "volumn-control"];
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        let dom = document.getElementById(element);
         while (dom != null) {
             dom.remove();
-            dom = document.getElementById(i);
+            dom = document.getElementById(element);
         }
-    })
+    }
+}
 
-    const elements = ["canvas", "btnPlayAndPause", "videoDom"];
-    resetElements(elements);
+const getVideo = async () => {
+    const getStreamByUrl = async (_url) => await fetch(`${serverUrl}/getvideo/${_url}`).then(async (response) => await response.blob()).catch((err) => null);
+
+    vidBody.classList.add("loader");
+    await resetElements();
 
     const url = document.getElementById("search-url").value;
     const encodedUrl = encodeURIComponent(url);
     const blob = await getStreamByUrl(encodedUrl);
-    const videoDom = document.createElement("video");
-    videoDom.id = "videoDom";
-    videoDom.src = URL.createObjectURL(blob);
-    videoDom.style.width = "1200px";
-    videoDom.style.height = "720px";
-
-    var timeId;
-    const videoBtn = getButton(videoDom);
-    initVideoEvents(timeId, videoBtn, videoDom);
-    videoBtn.addEventListener("click", (e) => videoBtnClickEvent(e.target, videoDom));
+    if (blob.size > 0) {
+        const videoDom = document.createElement("video");
+        videoDom.id = "videoDom";
+        videoDom.src = URL.createObjectURL(blob);
+        videoDom.style.width = "1200px";
+        videoDom.style.height = "720px";
+        vidBody.appendChild(videoDom);
+        const videoBtn = await getButton(videoDom);
+        initControls();
+        initVideoEvents(videoBtn, videoDom);
+    }
+    else {
+        alert("[Error] Wrong url. Please try again!");
+    }
+    vidBody.classList.remove("loader");
 }
 
-const initVideoEvents = (timerId, btn, videoDom) => {
+const initVideoEvents = (btn, videoDom) => {
     const renderVideoFrame = () => {
-        const asciiList = ["@", "#", "8", "&", "o", ":", "*", ".", " "];
+        // const asciiList = ["@", "#", "8", "&", "o", ":", "*", ".", " "];
+        const asciiList = [" ", ".", "*", ":", "o", "&", "8", "#", "@"];
         const scale = parseInt(videoDom.videoHeight / parseFloat(videoDom.style.height));
         const gap = 12 / scale;
         const videoSize = { width: parseFloat(videoDom.videoWidth), height: parseFloat(videoDom.videoHeight) };
@@ -52,7 +63,6 @@ const initVideoEvents = (timerId, btn, videoDom) => {
             canvas.width = videoSize.width;
             canvas.height = videoSize.height;
             vidBody.appendChild(canvas);
-            vidBody.appendChild(videoDom);
         }
 
         const ctx = canvas.getContext("2d");
@@ -68,11 +78,12 @@ const initVideoEvents = (timerId, btn, videoDom) => {
                     b = imgData[position + 2];
                 const gray = (r * 30 + g * 59 + b * 11 + 50) / 100;
                 const i = Math.min(asciiList.length - 1, parseInt(gray / (255 / asciiList.length)));
-                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillStyle = `rgba(${r},${g},${b},1)`;
                 ctx.fillText(asciiList[i], w, h);
             }
         }
     }
+    var timerId;
 
     const updateRender = () => {
         renderVideoFrame();
@@ -96,38 +107,62 @@ const initVideoEvents = (timerId, btn, videoDom) => {
 
     videoDom.addEventListener('pause', () => {
         console.log("pause");
-        btn.innerText = "play";
+        btn.innerText = "▶";
 
         stopRender();
     });
 
     videoDom.addEventListener('ended', () => {
         console.log("end");
-        btn.innerText = "play";
+        btn.innerText = "▶";
 
         stopRender();
     });
 }
 
-const getButton = (dom) => {
-    var btnPlayAndPause = document.createElement("div");
+const initControls = () => {
+    const setVolumn = (val) => {
+        const player = document.getElementById('videoDom');
+        console.log(player);
+        if (player) {
+            player.volume = val / 100;
+        }
+    }
+    const vidControl = document.getElementById('vid-control');
+
+    const volumnControl = document.createElement("input");
+    volumnControl.id = 'volumn-control'
+    volumnControl.type = 'range';
+    volumnControl.min = 0;
+    volumnControl.max = 100;
+    volumnControl.step = 1;
+    volumnControl.value = 75;
+    volumnControl.addEventListener("input", () => setVolumn(volumnControl.value));
+    volumnControl.addEventListener("change", () => setVolumn(volumnControl.value));
+
+    vidControl.appendChild(volumnControl);
+}
+
+const getButton = async (dom) => {
+    const btnPlayAndPause = document.createElement("div");
     btnPlayAndPause.id = 'btnPlayAndPause';
     btnPlayAndPause.style.color = "#fff";
     btnPlayAndPause.style.textAlign = "center";
     btnPlayAndPause.style.position = "absolute";
     btnPlayAndPause.style.top = btnPlayAndPause.style.left = "0px";
-    btnPlayAndPause.style.width = dom.style.width;
+    btnPlayAndPause.style.width = `${dom.parentNode.clientWidth}px`;
     btnPlayAndPause.style.height = btnPlayAndPause.style.lineHeight = dom.style.height;
     btnPlayAndPause.style.cursor = "pointer";
     btnPlayAndPause.style.fontSize = "50px";
     btnPlayAndPause.style.zIndex = 2;
-    btnPlayAndPause.innerText = "play";
+    btnPlayAndPause.innerText = "▶";
+    btnPlayAndPause.addEventListener("click", (e) => videoBtnClickEvent(e.target, dom));
     vidBody.appendChild(btnPlayAndPause);
     return btnPlayAndPause;
 }
 
 const videoBtnClickEvent = (btn, dom) => {
-    if (btn.innerText === "play") {
+    if (btn.innerText === "▶") {
         dom.play();
     } else {
         dom.pause();
@@ -136,3 +171,6 @@ const videoBtnClickEvent = (btn, dom) => {
 
 const searchBtn = document.getElementById('search-btn');
 searchBtn.addEventListener("click", async () => await getVideo());
+
+const ResetBtn = document.getElementById('reset-btn');
+ResetBtn.addEventListener("click", async () => { await resetElements(); document.getElementById("search-url").value = ''; });
