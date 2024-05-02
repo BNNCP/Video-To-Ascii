@@ -1,13 +1,9 @@
 const vidBody = document.getElementById('vid');
 const serverUrl = 'http://localhost:5000';
-
-const videos = new Map([
-    ["Bad Apple", "../src/BadApple.mp4"],
-    ["Baka Mitai", "../src/BakaMitai.mp4"]
-])
+// const serverUrl = 'https://localhost:7097';
 
 const resetElements = async () => {
-    const elements = ["canvas", "btnPlayAndPause", "videoDom", "volumn-control"];
+    const elements = ["canvas", "btnPlayAndPause", "videoDom", "volumn-control", 'ascii-panel'];
     for (let i = 0; i < elements.length; i++) {
         const element = elements[i];
         let dom = document.getElementById(element);
@@ -19,7 +15,13 @@ const resetElements = async () => {
 }
 
 const getVideo = async () => {
-    const getStreamByUrl = async (_url) => await fetch(`${serverUrl}/getvideo/${_url}`).then(async (response) => await response.blob()).catch((err) => null);
+    const getStreamByUrl = async (_url) => await fetch(`${serverUrl}/getvideo/${_url}`).then(async (response) => {
+        console.log(response)
+        return await response.blob();
+    }).then((data) => (data)).catch((err) => {
+        console.log(err);
+        return null;
+    });
 
     vidBody.classList.add("loader");
     await resetElements();
@@ -27,7 +29,8 @@ const getVideo = async () => {
     const url = document.getElementById("search-url").value;
     const encodedUrl = encodeURIComponent(url);
     const blob = await getStreamByUrl(encodedUrl);
-    if (blob.size > 0) {
+    console.log(blob);
+    if (blob != null) {
         const videoDom = document.createElement("video");
         videoDom.id = "videoDom";
         videoDom.src = URL.createObjectURL(blob);
@@ -45,9 +48,14 @@ const getVideo = async () => {
 }
 
 const initVideoEvents = (btn, videoDom) => {
+    const getAsciiMode = () => {
+        const asciiControl = document.getElementById('ascii-control');
+        const isChecked = asciiControl.checked;
+        return isChecked ? [" ", "-", "c", "o", "b", "&", "8", "#", "@"] : ["@", "#", "8", "&", "b", "o", "c", "-", " "];
+    }
     const renderVideoFrame = () => {
-        // const asciiList = ["@", "#", "8", "&", "o", ":", "*", ".", " "];
-        const asciiList = [" ", ".", "*", ":", "o", "&", "8", "#", "@"];
+        //const asciiList = ["@", "#", "8", "&", "o", ":", "*", ".", " "];
+        const asciiList = getAsciiMode();
         const scale = parseInt(videoDom.videoHeight / parseFloat(videoDom.style.height));
         const gap = 12 / scale;
         const videoSize = { width: parseFloat(videoDom.videoWidth), height: parseFloat(videoDom.videoHeight) };
@@ -121,25 +129,57 @@ const initVideoEvents = (btn, videoDom) => {
 }
 
 const initControls = () => {
-    const setVolumn = (val) => {
-        const player = document.getElementById('videoDom');
-        if (player) {
-            player.volume = val / 100;
+    const setVolumnControl = () => {
+        const setVolumn = (val) => {
+            const player = document.getElementById('videoDom');
+            if (player) {
+                player.volume = val / 100;
+            }
         }
+        const vidControl = document.getElementById('vid-control');
+
+        const volumnControl = document.createElement("input");
+        volumnControl.id = 'volumn-control'
+        volumnControl.type = 'range';
+        volumnControl.min = 0;
+        volumnControl.max = 100;
+        volumnControl.step = 1;
+        volumnControl.value = 75;
+        volumnControl.addEventListener("input", () => setVolumn(volumnControl.value));
+        volumnControl.addEventListener("change", () => setVolumn(volumnControl.value));
+
+        vidControl.appendChild(volumnControl);
     }
-    const vidControl = document.getElementById('vid-control');
 
-    const volumnControl = document.createElement("input");
-    volumnControl.id = 'volumn-control'
-    volumnControl.type = 'range';
-    volumnControl.min = 0;
-    volumnControl.max = 100;
-    volumnControl.step = 1;
-    volumnControl.value = 75;
-    volumnControl.addEventListener("input", () => setVolumn(volumnControl.value));
-    volumnControl.addEventListener("change", () => setVolumn(volumnControl.value));
+    const setAsciiControl = () => {
+        const setMode = (lbl, val) => {
+            if (val) {
+                lbl.innerText = '黑底模式'
+            }
+            else {
+                lbl.innerText = '白底模式'
+            }
+        }
 
-    vidControl.appendChild(volumnControl);
+        const vidControl = document.getElementById('vid-control');
+        const controlDiv = document.createElement("div");
+        controlDiv.style.display = 'flex';
+        controlDiv.id = 'ascii-panel';
+        const asciiLabel = document.createElement("div");
+        asciiLabel.innerText = '黑底模式';
+        const asciiControl = document.createElement("input");
+        asciiControl.id = 'ascii-control'
+        asciiControl.type = 'checkbox';
+        asciiControl.checked = true;
+        asciiControl.addEventListener("change", () => setMode(asciiLabel, asciiControl.checked));
+
+        vidControl.appendChild(controlDiv);
+        controlDiv.appendChild(asciiControl);
+        controlDiv.appendChild(asciiLabel);
+    }
+
+    setVolumnControl();
+    setAsciiControl();
 }
 
 const getButton = async (dom) => {
