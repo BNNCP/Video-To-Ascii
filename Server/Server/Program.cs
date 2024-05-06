@@ -56,6 +56,6 @@ async Task<Stream> DownloadVideo(string videoUrl)
 {   
     YoutubeClient youtube = new YoutubeClient();
     var streamManifest = await youtube.Videos.Streams.GetManifestAsync(videoUrl);
-    var streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+    var streamInfo = streamManifest.GetMuxedStreams().OrderBy(i => i.VideoQuality).FirstOrDefault()!;
     return await youtube.Videos.Streams.GetAsync(streamInfo);
 }
